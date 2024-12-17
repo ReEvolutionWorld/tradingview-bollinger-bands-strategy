@@ -1,1 +1,31 @@
-L2B2ZXJzaW9uPTUKc3RyYXRlZ3koIkJvbGxpbmdlciBCYW5kcyBTdHJhdGVneSIsIG92ZXJsYXk9dHJ1ZSkKCi8vIElucHV0IHBhcmFtZXRlcnMKbGVuZ3RoID0gMjAKbXVsdCA9IDIuMArzb3VyY2UgPSBjbG9zZQoKLy8gQ2FsY3VsYXRlIEJvbGxpbmdlciBCYW5kcwpiYXNpcyA9IHNtYShzb3VyY2UsIGxlbmd0aCkKZGV2ID0gbXVsdCAqIHN0ZGV2KHNvdXJjZSwgbGVuZ3RoKQp1cHBlciA9IGJhc2lzICsgZGV2Cmxvd2VyID0gYmFzaXMgLSBkZXYKCi8vIFBsb3QgQm9sbGluZ2VyIEJhbmRzCnBsb3QoYmFzaXMsIGNvbG9yPWJsdWUsIGxpbmV3aWR0aD0yLCB0aXRsZT0iQmFzaXMiKQpwMSA9IHBsb3QodXBwZXIsIGNvbG9yPXJlZCwgbGluZXdpZHRoPTIsIHRpdGxlPSJVcHBlciBCYW5kIikKcDIgPSBwbG90KGxvd2VyLCBjb2xvcj1ncmVlbiwgbGluZXdpZHRoPTIsIHRpdGxlPSJMb3dlciBCYW5kIikKZmlsbChwMSwgcDIsIGNvbG9yPWJsdWUsIG9wYWNpdHk9MjApCgkvLyBFbnRyeSBDb25kaXRpb25zCmxvbmdDb25kaXRpb24gPSBjcm9zc3VuZGVyKHNvdXJjZSwgbG93ZXIpCmlmIChsb25nQ29uZGl0aW9uKQogICAgc3RyYXRlZ3kuZW50cnkoIkxvbmciLCBzdHJhdGVneS5sb25nLCBzdG9wPWxvd2VzdChsb3csIDIpKQoKLy8gRmlyc3QgUHJvZml0IFRhcmdldCAtIE1pZGxpbmUKbWlkbGluZVByb2ZpdCA9IHN0cmF0ZWd5LnBvc2l0aW9uX2F2Z19wcmljZSArIChiYXNpcyAtIHN0cmF0ZWd5LnBvc2l0aW9uX2F2Z19wcmljZSkgKiAwLjUKc3RyYXRlZ3kuY2xvc2UoIkxvbmciLCBsaW1pdD1taWRsaW5lUHJvZml0LCB3aGVuPWNyb3NzOHZlcihzb3VyY2UsIGJhc2lzKSkKCi8vIFNlY29uZCBQcm9maXQgVGFyZ2V0IC0gVXBwZXIgQmFuZCBvciBSYW5nZSBIaWdoCnN0cmF0ZWd5LmNsb3NlKCJMb25nIiwgbGltaXQ9bWF4KHVwcGVyLCBoaWdoZXN0KGhpZ2gsIDIpKSwgc3RvcD1zdHJhdGVneS5wb3NpdGlvbl9hdmdfcHJpY2UpCg==
+//@version=5
+strategy("Bollinger Bands Strategy", overlay=true)
+
+// Input parameters
+length = 20
+mult = 2.0
+source = close
+
+// Calculate Bollinger Bands
+basis = sma(source, length)
+dev = mult * stdev(source, length)
+upper = basis + dev
+lower = basis - dev
+
+// Plot Bollinger Bands
+plot(basis, color=blue, linewidth=2, title="Basis")
+p1 = plot(upper, color=red, linewidth=2, title="Upper Band") 
+p2 = plot(lower, color=green, linewidth=2, title="Lower Band")
+fill(p1, p2, color=blue, opacity=20)
+
+// Entry Conditions
+longCondition = crossunder(source, lower)
+if (longCondition)
+    strategy.entry("Long", strategy.long, stop=lowest(low, 2))
+
+// First Profit Target - Midline
+midlineProfit = strategy.position_avg_price + (basis - strategy.position_avg_price) * 0.5
+strategy.close("Long", limit=midlineProfit, when=crossover(source, basis))
+
+// Second Profit Target - Upper Band or Range High
+strategy.close("Long", limit=max(upper, highest(high, 2)), stop=strategy.position_avg_price)
