@@ -14,7 +14,7 @@ lower = basis - dev
 
 // Plot Bollinger Bands
 plot(basis, color=blue, linewidth=2, title="Basis")
-p1 = plot(upper, color=red, linewidth=2, title="Upper Band") 
+p1 = plot(upper, color=red, linewidth=2, title="Upper Band")
 p2 = plot(lower, color=green, linewidth=2, title="Lower Band")
 fill(p1, p2, color=blue, opacity=20)
 
